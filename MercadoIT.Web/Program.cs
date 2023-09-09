@@ -1,3 +1,6 @@
+using MercadoIT.Web.Entities;
+using Microsoft.EntityFrameworkCore;
+
 namespace MercadoIT.Web
 {
     public class Program
@@ -8,6 +11,9 @@ namespace MercadoIT.Web
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddDbContext<NorthwindContext>(opciones =>
+                opciones.UseSqlServer("name=NorthwindDb"));
 
             var app = builder.Build();
 
