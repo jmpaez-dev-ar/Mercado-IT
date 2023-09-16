@@ -2,40 +2,37 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MercadoIT.Web.Entities;
+using MercadoIT.Web.DataAccess.Interfaces;
+using NuGet.Protocol.Core.Types;
+using System.Linq.Expressions;
 
 namespace MercadoIT.Web.Controllers
 {
     public class EmployeesController : Controller
     {
-        private readonly NorthwindContext _context;
+        protected readonly IRepositoryAsync<Employee> _repository;
 
-        public EmployeesController(NorthwindContext context)
+
+        public EmployeesController(IRepositoryAsync<Employee> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: Employees
         public async Task<IActionResult> Index()
         {
-            var northwindContext = _context.Employees;
-            return View(await northwindContext.ToListAsync());
+            var data = await _repository.GetAll();
+            return View(data);
         }
 
         // GET: Employees/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Employees == null)
+            if (id == null )
             {
                 return NotFound();
             }
-
-            var employee = await _context.Employees
-                .FirstOrDefaultAsync(m => m.EmployeeID == id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
+            var employee = await _repository.GetByID(id);
             return View(employee);
         }
 
@@ -54,8 +51,7 @@ namespace MercadoIT.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
+                await _repository.Insert(employee);
                 return RedirectToAction(nameof(Index));
             }
             return View(employee);
@@ -64,12 +60,12 @@ namespace MercadoIT.Web.Controllers
         // GET: Employees/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Employees == null)
+            if (id == null )
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _repository.GetByID(id);
             if (employee == null)
             {
                 return NotFound();
@@ -93,8 +89,7 @@ namespace MercadoIT.Web.Controllers
             {
                 try
                 {
-                    _context.Update(employee);
-                    await _context.SaveChangesAsync();
+                    _repository.Update(employee);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -115,13 +110,12 @@ namespace MercadoIT.Web.Controllers
         // GET: Employees/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Employees == null)
+            if (id == null )
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees
-                .FirstOrDefaultAsync(m => m.EmployeeID == id);
+            var employee = await _repository.GetByID(id);
 
 
             if (employee == null)
@@ -137,23 +131,30 @@ namespace MercadoIT.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Employees == null)
+            if (id == null)
             {
-                return Problem("Entity set 'NorthwindContext.Employees'  is null.");
-            }
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee != null)
-            {
-                _context.Employees.Remove(employee);
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
+            //var employee = await _repository.GetByID(id);
+            //if (employee == null)
+            //{
+            //    return NotFound();
+            //}
+
+            _repository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool EmployeeExists(int id)
         {
-            return (_context.Employees?.Any(e => e.EmployeeID == id)).GetValueOrDefault();
+            bool exists = false;
+            if (id != null)
+            {
+                var entity = _repository.GetByID(id);
+                exists = entity != null;
+            }
+            return exists;
         }
     }
 }

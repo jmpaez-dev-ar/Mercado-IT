@@ -1,0 +1,12 @@
+﻿@model PaginationViewModel
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (var page = 1; page <= Model.TotalPages; page++)
+        {
+            <li class="page-item @(page == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" href="@Url.Action(Model.PageAction, new { page = page, pageSize = Model.PageSize })">@(page)</a>
+            </li>
+        }
+    </ul>
+</nav>

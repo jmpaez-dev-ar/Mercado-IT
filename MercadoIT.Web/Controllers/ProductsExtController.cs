@@ -7,60 +7,75 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MercadoIT.Web.Entities;
 using MercadoIT.Web.DataAccess.Interfaces;
+using MercadoIT.Web.DataAccess.Services;
 using NuGet.Protocol.Core.Types;
 using System.Linq.Expressions;
-using MercadoIT.Web.DataAccess.Services;
 
 namespace MercadoIT.Web.Controllers
 {
-    public class ProductsController : Controller
+    public class ProductsExtController : Controller
     {
-        protected readonly IRepositoryAsync<Product> _repository;
+        private readonly NorthwindContext _context = new NorthwindContext();
+        private readonly IRepositoryAsync<Product> _productRepository;
 
-        protected readonly IRepositoryAsync<Category> _repositoryCategories;
-        protected readonly IRepositoryAsync<Supplier> _repositorySuppliers;
-
-        public ProductsController(IRepositoryAsync<Product> repository, IRepositoryAsync<Category> repositoryCategories, IRepositoryAsync<Supplier> repositorySuppliers)
+        public ProductsExtController(IRepositoryAsync<Product> productRepository)
         {
-            _repository = repository;
-            _repositoryCategories = repositoryCategories;
-            _repositorySuppliers = repositorySuppliers;
+            _productRepository = productRepository;
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
         {
-            var products = await _repository.GetAll(includes: new Expression<Func<Product, object>>[]
+            var totalItems = await _productRepository.CountAsync();
+
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var products = await _productRepository.GetPaged(
+                orderBy: q => q.OrderBy(p => p.ProductID),
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+                includes: new Expression<Func<Product, object>>[]
                     {
                         p => p.Category,
                         p => p.Supplier
-                    });
+                    }
+                );
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
+
             return View(products);
         }
+
 
         // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var product = await _repository.GetByID(id, includes: new Expression<Func<Product, object>>[]
-                    {
-                        p => p.Category,
-                        p => p.Supplier
-                    });
-            return View(product);
+            if (id == null || _context.Products == null)
+            {
+                return NotFound();
+            }
 
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Supplier)
+                .FirstOrDefaultAsync(m => m.ProductID == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
         }
 
         // GET: Products/Create
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            var lstCategories = await _repositoryCategories.GetAll();
-            var lstSuppliers = await _repositorySuppliers.GetAll();
-
-            ViewData["CategoryID"] = new SelectList(lstCategories, "CategoryID", "CategoryID");
-            ViewData["SupplierID"] = new SelectList(lstSuppliers, "SupplierID", "SupplierID");
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryName");
+            ViewData["SupplierID"] = new SelectList(_context.Suppliers, "SupplierID", "CompanyName");
             return View();
         }
-
 
         // POST: Products/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -71,38 +86,30 @@ namespace MercadoIT.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _repository.Insert(product);
+                _context.Add(product);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            var lstCategories = await _repositoryCategories.GetAll();
-            var lstSuppliers = await _repositorySuppliers.GetAll();
-
-            ViewData["CategoryID"] = new SelectList(lstCategories, "CategoryID", "CategoryID");
-            ViewData["SupplierID"] = new SelectList(lstSuppliers, "SupplierID", "SupplierID");
-
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
+            ViewData["SupplierID"] = new SelectList(_context.Suppliers, "SupplierID", "SupplierID", product.SupplierID);
             return View(product);
         }
-
-
 
         // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null )
+            if (id == null || _context.Products == null)
             {
                 return NotFound();
             }
 
-            var product = await _repository.GetByID(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-            var lstCategories = _repositoryCategories.GetAll().Result.ToList();
-            var lstSuppliers = _repositorySuppliers.GetAll().Result.ToList();
-
-            ViewData["CategoryID"] = new SelectList(lstCategories, "CategoryID", "CategoryID");
-            ViewData["SupplierID"] = new SelectList(lstSuppliers, "SupplierID", "SupplierID");
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
+            ViewData["SupplierID"] = new SelectList(_context.Suppliers, "SupplierID", "SupplierID", product.SupplierID);
             return View(product);
         }
 
@@ -122,7 +129,8 @@ namespace MercadoIT.Web.Controllers
             {
                 try
                 {
-                    _repository.Update(product);
+                    _context.Update(product);
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -137,29 +145,23 @@ namespace MercadoIT.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            var lstCategories = _repositoryCategories.GetAll().Result.ToList();
-            var lstSuppliers = _repositorySuppliers.GetAll().Result.ToList();
-
-            ViewData["CategoryID"] = new SelectList(lstCategories, "CategoryID", "CategoryID");
-            ViewData["SupplierID"] = new SelectList(lstSuppliers, "SupplierID", "SupplierID");
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
+            ViewData["SupplierID"] = new SelectList(_context.Suppliers, "SupplierID", "SupplierID", product.SupplierID);
             return View(product);
         }
-
 
         // GET: Products/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            if (id == null || _context.Products == null)
             {
                 return NotFound();
             }
 
-            var product = await _repository.GetByID(id, includes: new Expression<Func<Product, object>>[]
-                    {
-                        p => p.Category,
-                        p => p.Supplier
-                    });
-
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Supplier)
+                .FirstOrDefaultAsync(m => m.ProductID == id);
             if (product == null)
             {
                 return NotFound();
@@ -173,31 +175,23 @@ namespace MercadoIT.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (id == null)
+            if (_context.Products == null)
             {
-                return NotFound();
+                return Problem("Entity set 'NorthwindContext.Products'  is null.");
+            }
+            var product = await _context.Products.FindAsync(id);
+            if (product != null)
+            {
+                _context.Products.Remove(product);
             }
 
-            var product = await _repository.GetByID(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            _repository.Delete(id);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int? id)
+        private bool ProductExists(int id)
         {
-            bool exists = false;
-            if (id != null)
-            {
-                var entity = _repository.GetByID(id);
-                exists = entity != null;
-            }
-            return exists;
+            return (_context.Products?.Any(e => e.ProductID == id)).GetValueOrDefault();
         }
-
     }
 }
