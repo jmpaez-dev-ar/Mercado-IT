@@ -98,10 +98,6 @@ public partial class NorthwindContext : DbContext
             entity.Property(e => e.Title).HasMaxLength(30);
             entity.Property(e => e.TitleOfCourtesy).HasMaxLength(25);
 
-            entity.HasOne(d => d.ReportsToNavigation).WithMany(p => p.InverseReportsToNavigation)
-                .HasForeignKey(d => d.ReportsTo)
-                .HasConstraintName("FK_Employees_Employees");
-
             entity.HasMany(d => d.Territories).WithMany(p => p.Employees)
                 .UsingEntity<Dictionary<string, object>>(
                     "EmployeeTerritory",

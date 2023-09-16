@@ -37,15 +37,9 @@ public partial class Employee
 
     public string? Notes { get; set; }
 
-    public int? ReportsTo { get; set; }
-
     public string? PhotoPath { get; set; }
 
-    public virtual ICollection<Employee> InverseReportsToNavigation { get; set; } = new List<Employee>();
-
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
-    public virtual Employee? ReportsToNavigation { get; set; }
 
     public virtual ICollection<Territory> Territories { get; set; } = new List<Territory>();
 }
