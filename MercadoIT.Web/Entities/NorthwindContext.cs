@@ -25,7 +25,7 @@ public partial class NorthwindContext : DbContext
 
     public virtual DbSet<Order> Orders { get; set; }
 
-    public virtual DbSet<Order_Detail> Order_Details { get; set; }
+    public virtual DbSet<OrderDetail> Order_Details { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
 
@@ -196,7 +196,7 @@ public partial class NorthwindContext : DbContext
                 .HasConstraintName("FK_Orders_Shippers");
         });
 
-        modelBuilder.Entity<Order_Detail>(entity =>
+        modelBuilder.Entity<OrderDetail>(entity =>
         {
             entity.HasKey(e => new { e.OrderID, e.ProductID }).HasName("PK_Order_Details");
 

@@ -1,46 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MercadoIT.Web.Entities;
+using MercadoIT.Web.DataAccess.Interfaces;
 
 namespace MercadoIT.Web.Controllers
 {
     public class RegionsController : Controller
     {
-        private readonly NorthwindContext _context;
+        protected readonly IRepositoryAsync<Region> _repository;
 
-        public RegionsController(NorthwindContext context)
+        public RegionsController(IRepositoryAsync<Region> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: Regions
         public async Task<IActionResult> Index()
         {
-              return _context.Regions != null ? 
-                          View(await _context.Regions.ToListAsync()) :
-                          Problem("Entity set 'NorthwindContext.Regions'  is null.");
+            var regions = await _repository.GetAll();
+            return View(regions);
         }
 
         // GET: Regions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Regions == null)
+            if (id == null )
             {
                 return NotFound();
             }
 
-            var region = await _context.Regions
-                .FirstOrDefaultAsync(m => m.RegionID == id);
+            var region = await _repository.GetById(id);
             if (region == null)
             {
                 return NotFound();
             }
-
             return View(region);
         }
 
@@ -51,16 +44,13 @@ namespace MercadoIT.Web.Controllers
         }
 
         // POST: Regions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("RegionID,RegionDescription")] Region region)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(region);
-                await _context.SaveChangesAsync();
+                await _repository.Insert(region);
                 return RedirectToAction(nameof(Index));
             }
             return View(region);
@@ -69,12 +59,12 @@ namespace MercadoIT.Web.Controllers
         // GET: Regions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Regions == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var region = await _context.Regions.FindAsync(id);
+            var region = await _repository.GetById(id);
             if (region == null)
             {
                 return NotFound();
@@ -83,8 +73,6 @@ namespace MercadoIT.Web.Controllers
         }
 
         // POST: Regions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("RegionID,RegionDescription")] Region region)
@@ -98,12 +86,11 @@ namespace MercadoIT.Web.Controllers
             {
                 try
                 {
-                    _context.Update(region);
-                    await _context.SaveChangesAsync();
+                    await _repository.Update(region);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!RegionExists(region.RegionID))
+                    if (!await RegionExistsAsync(region.RegionID))
                     {
                         return NotFound();
                     }
@@ -120,18 +107,16 @@ namespace MercadoIT.Web.Controllers
         // GET: Regions/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Regions == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var region = await _context.Regions
-                .FirstOrDefaultAsync(m => m.RegionID == id);
+            var region = await _repository.GetById(id);
             if (region == null)
             {
                 return NotFound();
             }
-
             return View(region);
         }
 
@@ -140,23 +125,22 @@ namespace MercadoIT.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Regions == null)
+            if (!await RegionExistsAsync(id))
             {
-                return Problem("Entity set 'NorthwindContext.Regions'  is null.");
+                return NotFound();
             }
-            var region = await _context.Regions.FindAsync(id);
-            if (region != null)
-            {
-                _context.Regions.Remove(region);
-            }
-            
-            await _context.SaveChangesAsync();
+            await _repository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool RegionExists(int id)
+        private async Task<bool> RegionExistsAsync(int? id)
         {
-          return (_context.Regions?.Any(e => e.RegionID == id)).GetValueOrDefault();
+            bool exists = false;
+            if (id != null)
+            {
+                exists = await _repository.ExistById(id);
+            }
+            return exists;
         }
     }
 }

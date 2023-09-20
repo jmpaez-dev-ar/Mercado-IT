@@ -1,17 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MercadoIT.Web.Entities;
 using MercadoIT.Web.DataAccess.Interfaces;
-using NuGet.Protocol.Core.Types;
-using System.Linq.Expressions;
 
 namespace MercadoIT.Web.Controllers
 {
-    public class EmployeesController : Controller
+	public class EmployeesController : Controller
     {
         protected readonly IRepositoryAsync<Employee> _repository;
-
 
         public EmployeesController(IRepositoryAsync<Employee> repository)
         {
@@ -21,8 +17,8 @@ namespace MercadoIT.Web.Controllers
         // GET: Employees
         public async Task<IActionResult> Index()
         {
-            var data = await _repository.GetAll();
-            return View(data);
+            var employees = await _repository.GetAll();
+            return View(employees);
         }
 
         // GET: Employees/Details/5
@@ -32,7 +28,12 @@ namespace MercadoIT.Web.Controllers
             {
                 return NotFound();
             }
-            var employee = await _repository.GetByID(id);
+            
+            var employee = await _repository.GetById(id);
+            if (employee == null)
+            {
+				return NotFound();
+			}
             return View(employee);
         }
 
@@ -43,8 +44,6 @@ namespace MercadoIT.Web.Controllers
         }
 
         // POST: Employees/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("EmployeeID,LastName,FirstName,Title,TitleOfCourtesy,BirthDate,HireDate,Address,City,Region,PostalCode,Country,HomePhone,Extension,Photo,Notes,PhotoPath")] Employee employee)
@@ -65,7 +64,7 @@ namespace MercadoIT.Web.Controllers
                 return NotFound();
             }
 
-            var employee = await _repository.GetByID(id);
+            var employee = await _repository.GetById(id);
             if (employee == null)
             {
                 return NotFound();
@@ -74,8 +73,6 @@ namespace MercadoIT.Web.Controllers
         }
 
         // POST: Employees/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("EmployeeID,LastName,FirstName,Title,TitleOfCourtesy,BirthDate,HireDate,Address,City,Region,PostalCode,Country,HomePhone,Extension,Photo,Notes,PhotoPath")] Employee employee)
@@ -89,11 +86,11 @@ namespace MercadoIT.Web.Controllers
             {
                 try
                 {
-                    _repository.Update(employee);
+					await _repository.Update(employee);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeExists(employee.EmployeeID))
+                    if (!await EmployeeExistsAsync(employee.EmployeeID))
                     {
                         return NotFound();
                     }
@@ -115,14 +112,11 @@ namespace MercadoIT.Web.Controllers
                 return NotFound();
             }
 
-            var employee = await _repository.GetByID(id);
-
-
+            var employee = await _repository.GetById(id);
             if (employee == null)
             {
                 return NotFound();
             }
-
             return View(employee);
         }
 
@@ -131,29 +125,21 @@ namespace MercadoIT.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            //var employee = await _repository.GetByID(id);
-            //if (employee == null)
-            //{
-            //    return NotFound();
-            //}
-
-            _repository.Delete(id);
+			if (!await EmployeeExistsAsync(id))
+			{
+				return NotFound();
+			}
+            await _repository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EmployeeExists(int id)
+        private async Task<bool> EmployeeExistsAsync(int? id)
         {
             bool exists = false;
             if (id != null)
             {
-                var entity = _repository.GetByID(id);
-                exists = entity != null;
-            }
+                exists = await _repository.ExistById(id);
+			}
             return exists;
         }
     }

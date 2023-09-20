@@ -17,10 +17,17 @@ namespace MercadoIT.Web
             builder.Services.AddDbContext<NorthwindContext>(opciones =>
                 opciones.UseSqlServer("name=NorthwindDb"));
 
+            builder.Services.AddScoped<IRepositoryAsync<Customer>, RepositoryAsync<Customer>>();
             builder.Services.AddScoped<IRepositoryAsync<Product>, RepositoryAsync<Product>>();
             builder.Services.AddScoped<IRepositoryAsync<Category>, RepositoryAsync<Category>>();
             builder.Services.AddScoped<IRepositoryAsync<Supplier>, RepositoryAsync<Supplier>>();
             builder.Services.AddScoped<IRepositoryAsync<Employee>, RepositoryAsync<Employee>>();
+            builder.Services.AddScoped<IRepositoryAsync<Region>, RepositoryAsync<Region>>();
+            builder.Services.AddScoped<IRepositoryAsync<Shipper>, RepositoryAsync<Shipper>>();
+            builder.Services.AddScoped<IRepositoryAsync<Territory>, RepositoryAsync<Territory>>();
+            builder.Services.AddScoped<IRepositoryAsync<Order>, RepositoryAsync<Order>>();
+            builder.Services.AddScoped<IRepositoryAsync<OrderDetail>, RepositoryAsync<OrderDetail>>();
+            builder.Services.AddScoped<IRepositoryAsync<Invoice>, RepositoryAsync<Invoice>>();
 
             var app = builder.Build();
 

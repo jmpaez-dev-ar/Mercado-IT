@@ -6,41 +6,39 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MercadoIT.Web.Entities;
+using MercadoIT.Web.DataAccess.Interfaces;
 
 namespace MercadoIT.Web.Controllers
 {
     public class ShippersController : Controller
     {
-        private readonly NorthwindContext _context;
+        protected readonly IRepositoryAsync<Shipper> _repository;
 
-        public ShippersController(NorthwindContext context)
+        public ShippersController(IRepositoryAsync<Shipper> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: Shippers
         public async Task<IActionResult> Index()
         {
-              return _context.Shippers != null ? 
-                          View(await _context.Shippers.ToListAsync()) :
-                          Problem("Entity set 'NorthwindContext.Shippers'  is null.");
+            var shippers = await _repository.GetAll();
+            return View(shippers);
         }
 
         // GET: Shippers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Shippers == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var shipper = await _context.Shippers
-                .FirstOrDefaultAsync(m => m.ShipperID == id);
+            var shipper = await _repository.GetById(id);
             if (shipper == null)
             {
                 return NotFound();
             }
-
             return View(shipper);
         }
 
@@ -51,16 +49,13 @@ namespace MercadoIT.Web.Controllers
         }
 
         // POST: Shippers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ShipperID,CompanyName,Phone")] Shipper shipper)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(shipper);
-                await _context.SaveChangesAsync();
+                await _repository.Insert(shipper);
                 return RedirectToAction(nameof(Index));
             }
             return View(shipper);
@@ -69,12 +64,12 @@ namespace MercadoIT.Web.Controllers
         // GET: Shippers/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Shippers == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var shipper = await _context.Shippers.FindAsync(id);
+            var shipper = await _repository.GetById(id);
             if (shipper == null)
             {
                 return NotFound();
@@ -83,8 +78,6 @@ namespace MercadoIT.Web.Controllers
         }
 
         // POST: Shippers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ShipperID,CompanyName,Phone")] Shipper shipper)
@@ -98,12 +91,11 @@ namespace MercadoIT.Web.Controllers
             {
                 try
                 {
-                    _context.Update(shipper);
-                    await _context.SaveChangesAsync();
+                    _repository.Update(shipper);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ShipperExists(shipper.ShipperID))
+                    if (!await ShipperExistsAsync(shipper.ShipperID))
                     {
                         return NotFound();
                     }
@@ -120,18 +112,16 @@ namespace MercadoIT.Web.Controllers
         // GET: Shippers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Shippers == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var shipper = await _context.Shippers
-                .FirstOrDefaultAsync(m => m.ShipperID == id);
+            var shipper = await _repository.GetById(id);
             if (shipper == null)
             {
                 return NotFound();
             }
-
             return View(shipper);
         }
 
@@ -140,23 +130,22 @@ namespace MercadoIT.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Shippers == null)
+            if (!await ShipperExistsAsync(id))
             {
-                return Problem("Entity set 'NorthwindContext.Shippers'  is null.");
+                return NotFound();
             }
-            var shipper = await _context.Shippers.FindAsync(id);
-            if (shipper != null)
-            {
-                _context.Shippers.Remove(shipper);
-            }
-            
-            await _context.SaveChangesAsync();
+            await _repository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ShipperExists(int id)
+        private async Task<bool> ShipperExistsAsync(int? id)
         {
-          return (_context.Shippers?.Any(e => e.ShipperID == id)).GetValueOrDefault();
+            bool exists = false;
+            if (id != null)
+            {
+                exists = await _repository.ExistById(id);
+            }
+            return exists;
         }
     }
 }

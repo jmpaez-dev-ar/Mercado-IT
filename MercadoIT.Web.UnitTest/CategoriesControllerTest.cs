@@ -177,5 +177,43 @@ namespace MercadoIT.Web.UnitTest
             _context.SaveChanges();
         }
 
+
+        // [TestMethod]
+        /// <summary>
+        /// Prueba si 'edit' funciona. 
+        ///  TODO: No funciona. Revisar.
+        /// </summary>
+        /// <returns></returns>
+        public async Task CategoriesEditEditsAsync()
+        {
+            //Arrange
+            Category categoryTest = new Category() { CategoryName = "test1", Description = "test1" };
+            await _categoriesControllerTest.Create(categoryTest);
+
+            var expectedCategory = _context.Categories.Find(categoryTest.CategoryID);
+
+            categoryTest.CategoryName = "test2";
+            categoryTest.Description = "test2";
+
+            //Act
+            await _categoriesControllerTest.Edit(categoryTest.CategoryID);
+
+            _context.Entry(categoryTest).State = EntityState.Modified;
+
+            var actualCategory = _context.Categories.Find(categoryTest.CategoryID);
+
+            //Assert
+            Assert.AreEqual(expectedCategory, actualCategory);
+
+            DeleteTestFromDb();
+        }
+
+        private void DeleteTestFromDb()
+        {
+            var categories = _context.Categories.Where(e => e.CategoryName.Contains("test"));
+            _context.Categories.RemoveRange(categories);
+            _context.SaveChanges();
+        }
+
     }
 }

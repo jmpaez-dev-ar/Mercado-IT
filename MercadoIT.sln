@@ -5,9 +5,7 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercadoIT.Web", "MercadoIT.Web\MercadoIT.Web.csproj", "{1458FFC5-628E-4C73-9493-AA37230F129D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercadoIT.Web.UnitTest", "MercadoIT.Web.UnitTest\MercadoIT.Web.UnitTest.csproj", "{F7713009-27C0-431F-8F7C-F6F675A72EBD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercadoIT.Web.UnitTest2", "MercadoIT.Web.UnitTest2\MercadoIT.Web.UnitTest2.csproj", "{9F0A0DA3-22C4-42CA-A63B-6BCF1DFB965B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercadoIT.Web.UnitTest2", "MercadoIT.Web.UnitTest2\MercadoIT.Web.UnitTest2.csproj", "{9F0A0DA3-22C4-42CA-A63B-6BCF1DFB965B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		{1458FFC5-628E-4C73-9493-AA37230F129D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1458FFC5-628E-4C73-9493-AA37230F129D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1458FFC5-628E-4C73-9493-AA37230F129D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F7713009-27C0-431F-8F7C-F6F675A72EBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F7713009-27C0-431F-8F7C-F6F675A72EBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F7713009-27C0-431F-8F7C-F6F675A72EBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F7713009-27C0-431F-8F7C-F6F675A72EBD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9F0A0DA3-22C4-42CA-A63B-6BCF1DFB965B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9F0A0DA3-22C4-42CA-A63B-6BCF1DFB965B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F0A0DA3-22C4-42CA-A63B-6BCF1DFB965B}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -6,88 +6,91 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MercadoIT.Web.Entities;
+using MercadoIT.Web.DataAccess.Interfaces;
+using System.Collections;
+using NuGet.Protocol.Core.Types;
 
 namespace MercadoIT.Web.Controllers
 {
     public class TerritoriesController : Controller
     {
-        private readonly NorthwindContext _context;
+        private readonly IRepositoryAsync<Territory> _repositoryTerritories;
+        private readonly IRepositoryAsync<Region> _repositoryRegions;
 
-        public TerritoriesController(NorthwindContext context)
+        public TerritoriesController(IRepositoryAsync<Territory> repositoryTerritories, IRepositoryAsync<Region> repositoryRegions)
         {
-            _context = context;
+            _repositoryTerritories = repositoryTerritories;
+            _repositoryRegions = repositoryRegions;
         }
 
         // GET: Territories
         public async Task<IActionResult> Index()
         {
-            var northwindContext = _context.Territories.Include(t => t.Region);
-            return View(await northwindContext.ToListAsync());
+            var territories = await _repositoryTerritories.GetAll();
+            return View(territories);
         }
 
         // GET: Territories/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null || _context.Territories == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var territory = await _context.Territories
-                .Include(t => t.Region)
-                .FirstOrDefaultAsync(m => m.TerritoryID == id);
+            var territory = await _repositoryTerritories.GetById(id);
             if (territory == null)
             {
                 return NotFound();
             }
-
             return View(territory);
         }
 
         // GET: Territories/Create
         public IActionResult Create()
         {
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID");
+            var regions = (IEnumerable)_repositoryRegions.GetAll();
+            ViewData["RegionID"] = new SelectList(regions, "RegionID", "RegionID");
             return View();
         }
 
         // POST: Territories/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TerritoryID,TerritoryDescription,RegionID")] Territory territory)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(territory);
-                await _context.SaveChangesAsync();
+                await _repositoryTerritories.Insert(territory);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", territory.RegionID);
+            var regions = (IEnumerable)_repositoryRegions.GetAll();
+            ViewData["RegionID"] = new SelectList(regions, "RegionID", "RegionID");
+
             return View(territory);
         }
 
         // GET: Territories/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null || _context.Territories == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var territory = await _context.Territories.FindAsync(id);
+            var territory = await _repositoryTerritories.GetById(id);
             if (territory == null)
             {
                 return NotFound();
             }
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", territory.RegionID);
+
+            var regions = (IEnumerable)_repositoryRegions.GetAll();
+            ViewData["RegionID"] = new SelectList(regions, "RegionID", "RegionID");
+
             return View(territory);
         }
 
         // POST: Territories/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("TerritoryID,TerritoryDescription,RegionID")] Territory territory)
@@ -101,12 +104,11 @@ namespace MercadoIT.Web.Controllers
             {
                 try
                 {
-                    _context.Update(territory);
-                    await _context.SaveChangesAsync();
+                    await _repositoryTerritories.Update(territory);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TerritoryExists(territory.TerritoryID))
+                    if (!await TerritoryExistsAsync(territory.TerritoryID))
                     {
                         return NotFound();
                     }
@@ -117,26 +119,24 @@ namespace MercadoIT.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", territory.RegionID);
+            var regions = (IEnumerable)_repositoryRegions.GetAll();
+            ViewData["RegionID"] = new SelectList(regions, "RegionID", "RegionID");
             return View(territory);
         }
 
         // GET: Territories/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || _context.Territories == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var territory = await _context.Territories
-                .Include(t => t.Region)
-                .FirstOrDefaultAsync(m => m.TerritoryID == id);
+            var territory = await _repositoryTerritories.GetById(id);
             if (territory == null)
             {
                 return NotFound();
             }
-
             return View(territory);
         }
 
@@ -145,23 +145,22 @@ namespace MercadoIT.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (_context.Territories == null)
+            if (!await TerritoryExistsAsync(id))
             {
-                return Problem("Entity set 'NorthwindContext.Territories'  is null.");
+                return NotFound();
             }
-            var territory = await _context.Territories.FindAsync(id);
-            if (territory != null)
-            {
-                _context.Territories.Remove(territory);
-            }
-            
-            await _context.SaveChangesAsync();
+            await _repositoryTerritories.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TerritoryExists(string id)
+        private async Task<bool> TerritoryExistsAsync(string id)
         {
-          return (_context.Territories?.Any(e => e.TerritoryID == id)).GetValueOrDefault();
+            bool exists = false;
+            if (id != null)
+            {
+                exists = await _repositoryTerritories.ExistById(id);
+            }
+            return exists;
         }
     }
 }
