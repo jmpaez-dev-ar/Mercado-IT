@@ -3,24 +3,35 @@ using MercadoIT.Web.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Microsoft.EntityFrameworkCore;
+using MercadoIT.Web.DataAccess.Interfaces;
+using MercadoIT.Web.DataAccess.Services;
 
 namespace MercadoIT.Web.UnitTest.Controllers
 {
     [TestClass()]
     public class EmployeesControllerTestWithMock
     {
-        /// <summary>
-        /// Esta prueba confirmará que el método devuelve "NotFound" cuando se le da un ID nulo.
-        /// </summary>
-        [TestMethod]
+		protected IRepositoryAsync<Employee> _mockRepository;
+		private EmployeesController _employeesControllerTest;
+
+		[TestInitialize]
+		public void Inicializar()
+		{
+			_mockRepository = new Mock<IRepositoryAsync<Employee>>().Object;
+			_employeesControllerTest= new EmployeesController(_mockRepository);
+		}
+
+
+		/// <summary>
+		/// Esta prueba confirmará que el método devuelve "NotFound" cuando se le da un ID nulo.
+		/// </summary>
+		[TestMethod]
         public async Task Details_NullId_ReturnsNotFound()
         {
             // Arrange
-            var mockContext = new Mock<NorthwindContext>();
-            var controller = new EmployeesController(mockContext.Object);
 
             // Act
-            var result = await controller.Details(null);
+            var result = await _employeesControllerTest.Details(null);
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
@@ -32,11 +43,12 @@ namespace MercadoIT.Web.UnitTest.Controllers
             // Arrange (Preparar)
             var mockContext = new Mock<NorthwindContext>();
             var mockEmployees = new Mock<DbSet<Employee>>();
+
+            _mockRepository.Set
             mockContext.Setup(ctx => ctx.Employees).Returns(mockEmployees.Object);
-            var controller = new EmployeesController(mockContext.Object);
 
             // Act (Actuar)
-            var result = await controller.Index();
+            var result = await _employeesControllerTest.Index();
 
             // Assert (Afirmar)
             Assert.IsInstanceOfType(result, typeof(ViewResult));

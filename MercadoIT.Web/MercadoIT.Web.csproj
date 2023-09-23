@@ -7,6 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\OrderDetail\**" />
+    <Compile Remove="Views\Orders\**" />
+    <Compile Remove="Views\Order\**" />
+    <Content Remove="Views\OrderDetail\**" />
+    <Content Remove="Views\Orders\**" />
+    <Content Remove="Views\Order\**" />
+    <EmbeddedResource Remove="Views\OrderDetail\**" />
+    <EmbeddedResource Remove="Views\Orders\**" />
+    <EmbeddedResource Remove="Views\Order\**" />
+    <None Remove="Views\OrderDetail\**" />
+    <None Remove="Views\Orders\**" />
+    <None Remove="Views\Order\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\OrderController.cs" />
+    <Compile Remove="Controllers\OrderDetailController.cs" />
+    <Compile Remove="Controllers\OrdersController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
       <PrivateAssets>all</PrivateAssets>

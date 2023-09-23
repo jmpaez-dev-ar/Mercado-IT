@@ -46,7 +46,7 @@ namespace MercadoIT.Web.Controllers
 		// POST: Categories/Create
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("CategoryID,CategoryName,Description,Picture")] Category category)
+		public async Task<IActionResult> Create([Bind("CategoryID,Description,CategoryName, Picture")] Category category)
 		{
 			if (ModelState.IsValid)
 			{

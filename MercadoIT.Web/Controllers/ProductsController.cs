@@ -105,11 +105,11 @@ namespace MercadoIT.Web.Controllers
 			{
 				return NotFound();
 			}
-			var lstCategories = _repositoryCategories.GetAll().Result.ToList();
-			var lstSuppliers = _repositorySuppliers.GetAll().Result.ToList();
+			var lstCategories = await _repositoryCategories.GetAll();
+			var lstSuppliers = await _repositorySuppliers.GetAll();
 
-			ViewData["CategoryID"] = new SelectList(lstCategories, "CategoryID", "CategoryID");
-			ViewData["SupplierID"] = new SelectList(lstSuppliers, "SupplierID", "SupplierID");
+            ViewBag.CategoryID = new SelectList(lstCategories, "CategoryID", "CategoryName");
+			ViewData["SupplierID"] = new SelectList(lstSuppliers, "SupplierID", "CompanyName");
 
 			return View(product);
 		}

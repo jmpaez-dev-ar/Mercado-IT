@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\EmployeesControllerTest.cs" />
     <Compile Remove="Controllers\EmployeesControllerTestWithMock.cs" />
     <Compile Remove="EmployeesControllerTest.cs" />
     <Compile Remove="EmployeesControllerTestWithMock.cs" />
