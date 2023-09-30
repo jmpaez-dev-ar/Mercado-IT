@@ -2,55 +2,86 @@ using MercadoIT.Web.DataAccess.Interfaces;
 using MercadoIT.Web.DataAccess.Services;
 using MercadoIT.Web.Entities;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace MercadoIT.Web
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			//Log.Logger = new LoggerConfiguration()
+			////                .MinimumLevel.Verbose()
+			//                .MinimumLevel.Information()
+			//				.WriteTo.Console(theme:AnsiConsoleTheme.Code)
+			//            	.WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
+			//	            .CreateLogger();
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+			//            Log.Information("Starting up");
+			//            Log.Debug("Starting Debug");
+			//            Log.Warning("Starting Warning");
+			//            Log.Error("Starting Error");
 
-            builder.Services.AddDbContext<NorthwindContext>(opciones =>
-                opciones.UseSqlServer("name=NorthwindDb"));
 
-            builder.Services.AddScoped<IRepositoryAsync<Customer>, RepositoryAsync<Customer>>();
-            builder.Services.AddScoped<IRepositoryAsync<Product>, RepositoryAsync<Product>>();
-            builder.Services.AddScoped<IRepositoryAsync<Category>, RepositoryAsync<Category>>();
-            builder.Services.AddScoped<IRepositoryAsync<Supplier>, RepositoryAsync<Supplier>>();
-            builder.Services.AddScoped<IRepositoryAsync<Employee>, RepositoryAsync<Employee>>();
-            builder.Services.AddScoped<IRepositoryAsync<Region>, RepositoryAsync<Region>>();
-            builder.Services.AddScoped<IRepositoryAsync<Shipper>, RepositoryAsync<Shipper>>();
-            builder.Services.AddScoped<IRepositoryAsync<Territory>, RepositoryAsync<Territory>>();
-            builder.Services.AddScoped<IRepositoryAsync<Order>, RepositoryAsync<Order>>();
-            builder.Services.AddScoped<IRepositoryAsync<OrderDetail>, RepositoryAsync<OrderDetail>>();
-            builder.Services.AddScoped<IRepositoryAsync<Invoice>, RepositoryAsync<Invoice>>();
+			var builder = WebApplication.CreateBuilder(args);
 
-            var app = builder.Build();
+			IConfiguration configuracion = new ConfigurationBuilder()
+				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+				.Build();
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.Configuration(configuracion)
+				.CreateLogger();
+			builder.Host.UseSerilog();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+			Log.Information("Starting up");
+			Log.Debug("Starting Debug");
+			Log.Warning("Starting Warning");
+			Log.Error("Starting Error");
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
 
-            app.UseRouting();
+			builder.WebHost.UseSerilog();
 
-            app.UseAuthorization();
+			// Add services to the container.
+			builder.Services.AddControllersWithViews();
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+			builder.Services.AddDbContext<NorthwindContext>(opciones =>
+				opciones.UseSqlServer("name=NorthwindDb"));
 
-            app.Run();
-        }
-    }
+			builder.Services.AddScoped<IRepositoryAsync<Customer>, RepositoryAsync<Customer>>();
+			builder.Services.AddScoped<IRepositoryAsync<Product>, RepositoryAsync<Product>>();
+			builder.Services.AddScoped<IRepositoryAsync<Category>, RepositoryAsync<Category>>();
+			builder.Services.AddScoped<IRepositoryAsync<Supplier>, RepositoryAsync<Supplier>>();
+			builder.Services.AddScoped<IRepositoryAsync<Employee>, RepositoryAsync<Employee>>();
+			builder.Services.AddScoped<IRepositoryAsync<Region>, RepositoryAsync<Region>>();
+			builder.Services.AddScoped<IRepositoryAsync<Shipper>, RepositoryAsync<Shipper>>();
+			builder.Services.AddScoped<IRepositoryAsync<Territory>, RepositoryAsync<Territory>>();
+			builder.Services.AddScoped<IRepositoryAsync<Order>, RepositoryAsync<Order>>();
+			builder.Services.AddScoped<IRepositoryAsync<OrderDetail>, RepositoryAsync<OrderDetail>>();
+			builder.Services.AddScoped<IRepositoryAsync<Invoice>, RepositoryAsync<Invoice>>();
+
+			var app = builder.Build();
+
+			// Configure the HTTP request pipeline.
+			if (!app.Environment.IsDevelopment())
+			{
+				app.UseExceptionHandler("/Home/Error");
+				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+				app.UseHsts();
+			}
+
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
+
+			app.UseRouting();
+
+			app.UseAuthorization();
+
+			app.MapControllerRoute(
+				name: "default",
+				pattern: "{controller=Customers}/{action=Index}/{id?}");
+
+			app.Run();
+		}
+	}
 }

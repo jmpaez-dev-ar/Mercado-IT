@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using MercadoIT.Web.Entities;
 using MercadoIT.Web.DataAccess.Interfaces;
 using MercadoIT.Web.DataAccess.Services;
-using NuGet.Protocol.Core.Types;
 using System.Linq.Expressions;
 
 namespace MercadoIT.Web.Controllers

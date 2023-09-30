@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using MercadoIT.Web.Models;
+using System.Linq.Expressions;
 
 namespace MercadoIT.Web.DataAccess.Interfaces
 {
@@ -22,5 +23,7 @@ namespace MercadoIT.Web.DataAccess.Interfaces
                                  int? take = null,
                                  params Expression<Func<T, object>>[] includes);
         Task<int> CountAsync(Expression<Func<T, bool>> filter = null);
+
+        Task<PagedResult<T>> GetPagedDataAsync(Expression<Func<T, bool>> filter, int start, int length, string orderBy, bool ascending);
     }
 }
