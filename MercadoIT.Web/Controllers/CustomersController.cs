@@ -5,6 +5,7 @@ using MercadoIT.Web.DataAccess.Interfaces;
 using System.Linq.Expressions;
 using ClosedXML.Excel;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace MercadoIT.Web.Controllers
 {
@@ -29,7 +30,6 @@ namespace MercadoIT.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
-			_logger.LogInformation("Index");
 			return View();
 		}
 

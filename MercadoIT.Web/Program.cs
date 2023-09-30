@@ -12,16 +12,16 @@ namespace MercadoIT.Web
 		public static void Main(string[] args)
 		{
 			//Log.Logger = new LoggerConfiguration()
-			////                .MinimumLevel.Verbose()
-			//                .MinimumLevel.Information()
-			//				.WriteTo.Console(theme:AnsiConsoleTheme.Code)
-			//            	.WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
-			//	            .CreateLogger();
+			//.MinimumLevel.Verbose()
+			////.MinimumLevel.Information()
+			//.WriteTo.Console(theme: AnsiConsoleTheme.Code)
+			//.WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
+			//.CreateLogger();
 
-			//            Log.Information("Starting up");
-			//            Log.Debug("Starting Debug");
-			//            Log.Warning("Starting Warning");
-			//            Log.Error("Starting Error");
+			//Log.Information("Inicio la App");
+			//Log.Debug("Starting Debug");
+			//Log.Warning("Starting Warning");
+			//Log.Error("Hubo un Error");
 
 
 			var builder = WebApplication.CreateBuilder(args);
@@ -34,10 +34,6 @@ namespace MercadoIT.Web
 				.CreateLogger();
 			builder.Host.UseSerilog();
 
-			Log.Information("Starting up");
-			Log.Debug("Starting Debug");
-			Log.Warning("Starting Warning");
-			Log.Error("Starting Error");
 
 
 			builder.WebHost.UseSerilog();
