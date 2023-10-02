@@ -3,6 +3,7 @@ using MercadoIT.Web.Entities;
 using MercadoIT.Web.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace MercadoIT.Web.DataAccess.Services
 {
@@ -180,8 +181,9 @@ namespace MercadoIT.Web.DataAccess.Services
         private IQueryable<T> ApplySorting(IQueryable<T> query, string orderBy, bool ascending)
         {
             var type = typeof(T);
-            var property = type.GetProperty(orderBy);
-            if (property != null)
+			var property = type.GetProperty(orderBy, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+			if (property != null)
             {
                 var parameter = Expression.Parameter(type, "p");
                 var propertyAccess = Expression.MakeMemberAccess(parameter, property);

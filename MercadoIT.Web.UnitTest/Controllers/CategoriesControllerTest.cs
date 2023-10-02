@@ -4,8 +4,6 @@ using MercadoIT.Web.DataAccess.Services;
 using MercadoIT.Web.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using NuGet.Protocol.Core.Types;
 
 namespace MercadoIT.Web.UnitTest.Controllers
 {

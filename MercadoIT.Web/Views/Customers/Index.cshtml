@@ -67,19 +67,31 @@
 	<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
 
-	<script>
+	<script src="~/js/customerdatatable.js"></script>
+@* 	<script>
 		$(document).ready(function () {
 			$('#customerTable').DataTable({
 				"processing": true,     // for show progress bar
 				"serverSide": true,     // for process server side
 				"filter": true,         // enable/disable search box
-				"orderMulti": false,    // enable/disable multiple columns at once
+				"orderMulti": true,    // enable/disable multiple columns at once
 
 
 				"ajax": {
 					"url": "/Customers/GetData",
 					"type": "GET",
-					"datatype": "json"
+					"datatype": "json",
+					"async": true,
+					"data": function (d) {
+						return {
+							draw: d.draw,
+							start: d.start,
+							length: d.length,
+							orderBy: d.columns[d.order[0].column].data,
+							ascending: d.order[0].dir === "asc",
+							search: d.search.value
+						};
+					},
 				},
 				"columns": [
 					{ "data": "companyName", "name": "CompanyName" },
@@ -105,44 +117,37 @@
 				"order": [0, "asc"],
 				"paging": true,
 				"pageLength": 10,
-				"dom": 'Bfrtip',
+				"lengthMenu": [10, 25, 50, 100],
+				"dom": 'BlCfrtip',
 				"buttons": [
-					// 'copy', 'csv', 'excel', 'pdf', 'print',
-					// {
-					// 	extend: 'pdfHtml5',
-					// 	orientation: 'landscape',
-					// 	pageSize: 'LEGAL',
-					// 	// columns: [0, 1, 2, 3, 4, 5, 6, 7, 8 ] // Exportar solo las columnas Id, Name, y Email
-					// },
-
 					{
-						extend: 'excelHtml5',
+						extend: 'excelHtml5',					// Habilitar el botón de Excel
 						filename: 'Listado Excel',
 						title: 'Mi Título',
 						extension: '.xlsx',
 						exportOptions: {
-						columns: ':not(:last-child)'  // Excluir la última columna (botones de acción)
-							 //columns: [0, 1, 2, 3, 4, 5, 6, 7, 8 ] // Exportar solo las columnas 
+							columns: ':not(:last-child)'		// Excluir la última columna (botones de acción)
+							//columns: [0, 1, 2, 3, 4, 5, 6]	// Exportar solo las columnas
 						},
 						customize: function (xlsx) {
 							var sheet = xlsx.xl.worksheets['sheet1.xml'];
-							// Aquí puedes manipular el sheet, si lo necesitas.
+
 						}
 					}
 					,
 					{
-						extend: 'csvHtml5',
+						extend: 'csvHtml5',						// Habilitar el botón de CSV
 						exportOptions: {
-							columns: ':not(:last-child)' // Excluir la última columna (botones de acción)
+							columns: ':not(:last-child)'		// Excluir la última columna (botones de acción)
 						}
 					},
 					{
-						extend: 'pdfHtml5',
+						extend: 'pdfHtml5',						// Habilitar el botón de PDF
 						title: 'Listado PDF',
-						orientation: 'landscape', // 'portrait'
-						pageSize: 'A4',
+						orientation: 'landscape',				// 'portrait'
+						pageSize: 'A4',							// A3 , A5 , A6 , legal , letter
 						exportOptions: {
-							// columns: [0, 2]  // Exportar solo la primera y la tercera columna
+							// columns: [0, 2]					// Exportar solo la primera y la tercera columna
 							columns: ':not(:last-child)'
 						},
 						customize: function (doc) {
@@ -152,7 +157,14 @@
 								Array(doc.content[1].table.body[0].length + 1).join('*').split('');
 						}
 					},
-					'copy'
+					{
+						extend: 'copy',							// Habilitar el botón 'copy'
+						text: 'Copiar',							// Texto personalizado para el botón 'copy'
+						exportOptions: {
+							columns: [0, 1, 2]					// Columnas que se copiarán
+						}
+					},
+					'print'										// Habilitar el botón de impresión
 
 				],
 				"language": {
@@ -170,5 +182,5 @@
 
 
 	</script>
-
+ *@
 }

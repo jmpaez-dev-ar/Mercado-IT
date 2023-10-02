@@ -11,32 +11,30 @@ namespace MercadoIT.Web
 	{
 		public static void Main(string[] args)
 		{
-			//Log.Logger = new LoggerConfiguration()
-			//.MinimumLevel.Verbose()
-			////.MinimumLevel.Information()
-			//.WriteTo.Console(theme: AnsiConsoleTheme.Code)
-			//.WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
-			//.CreateLogger();
+			Log.Logger = new LoggerConfiguration()
+			.MinimumLevel.Verbose()
+			//.MinimumLevel.Information()
+			.WriteTo.Console(theme: AnsiConsoleTheme.Code)
+			.WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
+			.CreateLogger();
 
-			//Log.Information("Inicio la App");
-			//Log.Debug("Starting Debug");
-			//Log.Warning("Starting Warning");
-			//Log.Error("Hubo un Error");
+			Log.Information("Inicio la App");
+			Log.Debug("Starting Debug");
+			Log.Warning("Starting Warning");
+			Log.Error("Hubo un Error");
 
 
 			var builder = WebApplication.CreateBuilder(args);
 
-			IConfiguration configuracion = new ConfigurationBuilder()
-				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-				.Build();
-			Log.Logger = new LoggerConfiguration()
-				.ReadFrom.Configuration(configuracion)
-				.CreateLogger();
-			builder.Host.UseSerilog();
+			//IConfiguration configuracion = new ConfigurationBuilder()
+			//	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+			//	.Build();
+			//Log.Logger = new LoggerConfiguration()
+			//	.ReadFrom.Configuration(configuracion)
+			//	.CreateLogger();
 
-
-
-			builder.WebHost.UseSerilog();
+			//builder.Host.UseSerilog();
+			//builder.WebHost.UseSerilog();
 
 			// Add services to the container.
 			builder.Services.AddControllersWithViews();

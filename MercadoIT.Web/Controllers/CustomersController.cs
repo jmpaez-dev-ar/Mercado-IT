@@ -20,40 +20,64 @@ namespace MercadoIT.Web.Controllers
 			_repository = repository;
 		}
 
-		// GET: Customers
-		//public async Task<IActionResult> Index()
-		//{
-		//	var customers = await _repository.GetAll();
-		//	return View(customers);
-		//}
-
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
 			return View();
 		}
 
+		//[HttpPost]
+		//public async Task<IActionResult> GetData(int start = 0, int length = 10, string orderBy = "Id", bool ascending = true, string search = "")
+		//{
+		//	// Aplicar filtro de búsqueda
+		//	Expression<Func<Customer, bool>> filter = x =>
+		//		(string.IsNullOrEmpty(search) || x.CompanyName.Contains(search) || x.CustomerID.Contains(search));
+
+		//	// Obtener datos paginados y filtrados
+		//	var pagedData = await _repository.GetPagedDataAsync(filter, start, length, orderBy, ascending);
+
+		//	// Convertir a formato DataTables
+		//	var result = new
+		//	{
+		//		draw = HttpContext.Request.Query["draw"].FirstOrDefault(),
+		//		recordsFiltered = pagedData.TotalRecords,
+		//		recordsTotal = pagedData.TotalRecords,
+		//		data = pagedData.Data
+		//	};
+
+		//	return Json(result);
+		//}
+
 		[HttpGet]
-		public async Task<IActionResult> GetData(int start = 0, int length = 10, string orderBy = "Id", bool ascending = true, string search = "")
+		public async Task<IActionResult> GetData(int start = 0, int length = 10, string orderBy = "", bool ascending = true, string search = "")
 		{
-			// Aplicar filtro de búsqueda
-			Expression<Func<Customer, bool>> filter = x =>
-				(string.IsNullOrEmpty(search) || x.CompanyName.Contains(search) || x.CustomerID.Contains(search));
-
-			// Obtener datos paginados y filtrados
-			var pagedData = await _repository.GetPagedDataAsync(filter, start, length, orderBy, ascending);
-
-			// Convertir a formato DataTables
-			var result = new
+			try
 			{
-				draw = HttpContext.Request.Query["draw"].FirstOrDefault(),
-				recordsFiltered = pagedData.TotalRecords,
-				recordsTotal = pagedData.TotalRecords,
-				data = pagedData.Data
-			};
+				// Aplicar filtro de búsqueda
+				Expression<Func<Customer, bool>> filter = x =>
+					(string.IsNullOrEmpty(search) || x.CompanyName.Contains(search) || x.CustomerID.Contains(search));
 
-			return Json(result);
+				// Obtener datos paginados y filtrados
+				var pagedData = await _repository.GetPagedDataAsync(filter, start, length, orderBy, ascending);
+
+				// Convertir a formato DataTables
+				var result = new
+				{
+					draw = HttpContext.Request.Query["draw"].FirstOrDefault(),
+					recordsFiltered = pagedData.TotalRecords,
+					recordsTotal = pagedData.TotalRecords,
+					data = pagedData.Data
+				};
+
+				return Json(result);
+			}
+			catch (Exception ex)
+			{
+				// Manejar la excepción según sea necesario
+				return Json(new { error = ex.Message });
+			}
 		}
+
 
 		// GET: Customers/Details/5
 		public async Task<IActionResult> Details(string? id)
